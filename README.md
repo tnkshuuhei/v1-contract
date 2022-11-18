@@ -1,7 +1,19 @@
 # v1-contract
 
-This is written in ink![https://paritytech.github.io/ink/] and is a smartcontract based on the concept of **_Centralized Liquidity_**
-Concentrated Liquidity provides high capital efficiency and low Inpermanent Loss(IL)
+## Concept
+This is written in [ink!](https://paritytech.github.io/ink/) and is a smartcontract based on the concept of ***_Centralized Liquidity_***
+
+Concentrated Liquidity provides **high capital efficiency** and **low Inpermanent Loss(IL)**
+
+---
+
+## Contracts
+- Factory
+- Pool
+- PSP34
+- router
+
+---
 
 ## Enviroments
 
