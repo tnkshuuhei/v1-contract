@@ -38,10 +38,11 @@ where
         self.data::<data::Data>().pair_contract_code_hash
     }
 
-    default fn create_pair(
+    default fn create_pool(
         &mut self,
         token_a: AccountId,
         token_b: AccountId,
+				fee:f64,
     ) -> Result<AccountId, FactoryError> {
         ensure!(token_a != token_b, FactoryError::IdenticalAddresses);
         let token_pair = if token_a < token_b {
@@ -74,12 +75,25 @@ where
         self._emit_create_pair_event(
             token_pair.0,
             token_pair.1,
-            pair_contract,
+            fee,
             self.all_pairs_length(),
         );
-
         Ok(pair_contract)
     }
+
+		// function list
+		// default fn owner(){
+		// }
+		// default fn fee_amount_tickspacing(&mut sele, fee) -> u32:tickspacing{
+		// }
+		// default fn get_pool(){
+		// }
+		// default fn create_pool(){	
+		// }
+		// default fn set_owner(){
+		// }
+		// default fn enable_fee_amount(&mut self,f64:fee,u32:tickspacing) {
+		// }
 
     #[modifiers(only_fee_setter)]
     default fn set_fee_to(&mut self, fee_to: AccountId) -> Result<(), FactoryError> {

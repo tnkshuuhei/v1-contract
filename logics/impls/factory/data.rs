@@ -15,4 +15,6 @@ pub struct Data {
     pub get_pair: Mapping<(AccountId, AccountId), AccountId>,
     pub all_pairs: Vec<AccountId>,
     pub pair_contract_code_hash: Hash,
+		pub fee : f64,
+		pub tickspacing: u32,
 }
