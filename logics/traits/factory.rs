@@ -7,36 +7,30 @@ pub type FactoryRef = dyn Factory;
 
 #[openbrush::trait_definition]
 pub trait Factory {
-    #[ink(message)]
-    fn all_pairs(&self, pid: u64) -> Option<AccountId>;
+		#[ink(message)]
+		fn owner(&self) -> u8;
+		
+		#[ink(message)]
+		fn fee_amount_tickspacing(&self,fee: u8) -> u8;
 
+		
+		#[ink(message)]
+		fn get_pool(&self, token_a: AccountId, token_b: AccountId, fee:u8) -> Option<AccountId>;
+		
     #[ink(message)]
-    fn all_pairs_length(&self) -> u64;
-
-    #[ink(message)]
-    fn pair_contract_code_hash(&self) -> Hash;
-
-    #[ink(message)]
-    fn create_pair(
-        &mut self,
-        token_a: AccountId,
-        token_b: AccountId,
+    fn create_pool(
+			&mut self,
+			token_a: AccountId,
+			token_b: AccountId,
+			fee:u8
     ) -> Result<AccountId, FactoryError>;
+		
+		#[ink(message)]
+		fn set_owner(&self, _owner: AccountId) -> AccountId;
+		
+		#[ink(message)]
+		fn enable_fee_amount(mut &self, fee:u8, tickspacing:u8) -> AccountId;
 
-    #[ink(message)]
-    fn set_fee_to(&mut self, fee_to: AccountId) -> Result<(), FactoryError>;
-
-    #[ink(message)]
-    fn set_fee_to_setter(&mut self, fee_to_setter: AccountId) -> Result<(), FactoryError>;
-
-    #[ink(message)]
-    fn fee_to(&self) -> AccountId;
-
-    #[ink(message)]
-    fn fee_to_setter(&self) -> AccountId;
-
-    #[ink(message)]
-    fn get_pair(&self, token_a: AccountId, token_b: AccountId) -> Option<AccountId>;
 }
 
 #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]

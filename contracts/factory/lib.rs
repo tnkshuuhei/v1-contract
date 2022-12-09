@@ -1,9 +1,42 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+#![feature(min_specialization)]
 
 use ink_lang as ink;
 
 #[ink::contract]
 mod factory {
+    use ink_lang::{
+        codegen::{
+            EmitEvent,
+            Env,
+        },
+        ToAccountId,
+    };
+		#[ink(event)]
+		pub struct OwnerChanged {
+			pub old_owner: AccountId,
+			pub new_owner: AccountId,
+		}
+
+    #[ink(event)]
+    pub struct PoolCreated {
+			#[ink(topic)]
+			pub token_0: AccountId,
+			#[ink(topic)]
+			pub token_1: AccountId,
+			pub fee: u8,
+			pub tickspacing: u8,
+			pub pool: AccountId,
+			pub pool_len: u64,
+    }
+		#[ink(event)]
+		pub struct FeeAmountEnabled {
+			#[ink(topic)]
+			pub fee: u8,
+			
+			#[ink(topic)]
+			pub tickspacing: u8,
+		}
 
     /// Defines the storage of your contract.
     /// Add new fields to the below struct in order
