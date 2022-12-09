@@ -12,9 +12,9 @@ pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Data);
 pub struct Data {
     pub fee_to: AccountId,
     pub fee_to_setter: AccountId,
-    pub get_pair: Mapping<(AccountId, AccountId), AccountId>,
+    pub get_pool: Mapping<(AccountId, AccountId), AccountId>,
     pub all_pairs: Vec<AccountId>,
     pub pair_contract_code_hash: Hash,
-		pub fee : f64,
-		pub tickspacing: u32,
+		pub fee : u8,
+		pub tickspacing: u8,
 }
