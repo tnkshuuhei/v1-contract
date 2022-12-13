@@ -26,7 +26,7 @@ mod factory {
 			#[ink(topic)]
 			pub token_1: AccountId,
 			pub fee: u8,
-			pub tickspacing: u8,
+			pub tickspacing: i8,
 			pub pool: AccountId,
     }
 		#[ink(event)]
@@ -35,7 +35,7 @@ mod factory {
 			pub fee: u8,
 			
 			#[ink(topic)]
-			pub tickspacing: u8,
+			pub tickspacing: i8,
 		}
     #[ink(storage)]
     #[derive(Default, SpreadAllocate, Storage)]
@@ -47,7 +47,7 @@ mod factory {
     impl Factory for FactoryContract {}
 
     impl factory::Internal for FactoryContract {
-        fn _instantiate_pair(&mut self, salt_bytes: &[u8]) -> Result<AccountId, FactoryError> {
+        fn _instantiate_pool(&mut self, salt_bytes: &[u8]) -> Result<AccountId, FactoryError> {
             let pair_hash = self.factory.pair_contract_code_hash;
             let pair = PairContractRef::new()
                 .endowment(0)
@@ -63,7 +63,7 @@ mod factory {
             token_0: AccountId,
             token_1: AccountId,
 						fee: u8,
-						tickspacing: u8,
+						tick_spacing: i8,
 						pool: AccountId,
         ) {
             EmitEvent::<FactoryContract>::emit_event(
@@ -72,7 +72,7 @@ mod factory {
                     token_0,
                     token_1,
                     fee,
-                    tickspacing,
+                    tick_spacing,
 										pool
                 },
             )
