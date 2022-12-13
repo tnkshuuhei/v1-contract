@@ -3,7 +3,7 @@
 
 use ink_lang as ink;
 
-#[ink::contract]
+#[openbrush::contract]
 mod factory {
     use ink_lang::{
         codegen::{
@@ -12,6 +12,7 @@ mod factory {
         },
         ToAccountId,
     };
+		
 		#[ink(event)]
 		pub struct OwnerChanged {
 			pub old_owner: AccountId,
@@ -27,7 +28,6 @@ mod factory {
 			pub fee: u8,
 			pub tickspacing: u8,
 			pub pool: AccountId,
-			pub pool_len: u64,
     }
 		#[ink(event)]
 		pub struct FeeAmountEnabled {
@@ -37,71 +37,86 @@ mod factory {
 			#[ink(topic)]
 			pub tickspacing: u8,
 		}
-
-    /// Defines the storage of your contract.
-    /// Add new fields to the below struct in order
-    /// to add new static storage fields to your contract.
     #[ink(storage)]
-    pub struct Factory {
-        /// Stores a single `bool` value on the storage.
-        value: bool,
+    #[derive(Default, SpreadAllocate, Storage)]
+    pub struct FactoryContract {
+        #[storage_field]
+        factory: data::Data,
     }
 
-    impl Factory {
-        /// Constructor that initializes the `bool` value to the given `init_value`.
-        #[ink(constructor)]
-        pub fn new(init_value: bool) -> Self {
-            Self { value: init_value }
+    impl Factory for FactoryContract {}
+
+    impl factory::Internal for FactoryContract {
+        fn _instantiate_pair(&mut self, salt_bytes: &[u8]) -> Result<AccountId, FactoryError> {
+            let pair_hash = self.factory.pair_contract_code_hash;
+            let pair = PairContractRef::new()
+                .endowment(0)
+                .code_hash(pair_hash)
+                .salt_bytes(&salt_bytes[..4])
+                .instantiate()
+                .map_err(|_| FactoryError::PairInstantiationFailed)?;
+            Ok(pair.to_account_id())
         }
 
-        /// Constructor that initializes the `bool` value to `false`.
-        ///
-        /// Constructors can delegate to other constructors.
-        #[ink(constructor)]
-        pub fn default() -> Self {
-            Self::new(Default::default())
-        }
-
-        /// A message that can be called on instantiated contracts.
-        /// This one flips the value of the stored `bool` from `true`
-        /// to `false` and vice versa.
-        #[ink(message)]
-        pub fn flip(&mut self) {
-            self.value = !self.value;
-        }
-
-        /// Simply returns the current value of our `bool`.
-        #[ink(message)]
-        pub fn get(&self) -> bool {
-            self.value
+        fn _emit_create_pool_event(
+            &self,
+            token_0: AccountId,
+            token_1: AccountId,
+						fee: u8,
+						tickspacing: u8,
+						pool: AccountId,
+        ) {
+            EmitEvent::<FactoryContract>::emit_event(
+                self.env(),
+                PoolCreated {
+                    token_0,
+                    token_1,
+                    fee,
+                    tickspacing,
+										pool
+                },
+            )
         }
     }
 
-    /// Unit tests in Rust are normally defined within such a `#[cfg(test)]`
-    /// module and test functions are marked with a `#[test]` attribute.
-    /// The below code is technically just normal Rust code.
+    impl FactoryContract {
+        #[ink(constructor)]
+        pub fn new(fee_to_setter: AccountId, pair_code_hash: Hash) -> Self {
+            ink_lang::codegen::initialize_contract(|instance: &mut Self| {
+                instance.factory.pair_contract_code_hash = pair_code_hash;
+								let caller = Self::env().caller();
+								fn _emit_owner_changed(
+									&self,
+									old_owner: AccountId,
+									new_owner: AccountId
+							) {
+									EmitEvent::<FactoryContract>::emit_event(
+											self.env(),
+											OwnerChanged {
+												old_owner, //ZeroAccount
+												caller
+											},
+									)
+							}
+							// TODO feeamountenabled event
+            })
+        }
+    }
     #[cfg(test)]
     mod tests {
-        /// Imports all the definitions from the outer scope so we can use them here.
+        use ink_env::{
+            test::default_accounts,
+            Hash,
+        };
+        use openbrush::traits::AccountIdExt;
+
         use super::*;
 
-        /// Imports `ink_lang` so we can use `#[ink::test]`.
-        use ink_lang as ink;
-
-        /// We test if the default constructor does its job.
-        #[ink::test]
-        fn default_works() {
-            let factory = Factory::default();
-            assert_eq!(factory.get(), false);
-        }
-
-        /// We test a simple use case of our contract.
-        #[ink::test]
-        fn it_works() {
-            let mut factory = Factory::new(false);
-            assert_eq!(factory.get(), false);
-            factory.flip();
-            assert_eq!(factory.get(), true);
+        #[ink_lang::test]
+        fn initialize_works() {
+            let accounts = default_accounts::<ink_env::DefaultEnvironment>();
+            let factory = FactoryContract::new(accounts.alice, Hash::default());
+            assert!(factory.factory.fee_to.is_zero());
         }
     }
 }
