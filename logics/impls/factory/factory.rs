@@ -1,4 +1,4 @@
-use crate::traits::pair::PairRef;
+use crate::traits::pair::PoolRef;
 pub use crate::{
     ensure,
     impls::factory::*,
@@ -42,7 +42,7 @@ where
         &mut self,
         token_a: AccountId,
         token_b: AccountId,
-				fee:f64,
+				fee: u8,
     ) -> Result<AccountId, FactoryError> {
         ensure!(token_a != token_b, FactoryError::IdenticalAddresses);
         let token_pair = if token_a < token_b {
@@ -53,47 +53,36 @@ where
         ensure!(!token_pair.0.is_zero(), FactoryError::ZeroAddress);
         ensure!(
             self.data::<data::Data>()
-                .get_pair
+                .get_pool
                 .get(&token_pair)
                 .is_none(),
             FactoryError::PairExists
         );
+				let tick_spacing:i8 = fee_amount_tick_spacing[fee];
+				ensure!(tick_spacing != 0, FactoryError::TickSpacingIsZero);
 
         let salt = Self::env().hash_encoded::<Blake2x256, _>(&token_pair);
-        let pair_contract = self._instantiate_pair(salt.as_ref());
+        let pool_contract = self._instantiate_pool(salt.as_ref());
 
-        PairRef::initialize(&pair_contract, token_pair.0, token_pair.1)?;
+        PoolRef::initialize(&pool_contract, token_pair.0, token_pair.1)?;
 
         self.data::<data::Data>()
             .get_pair
-            .insert(&(token_pair.0, token_pair.1), &pair_contract);
+            .insert(&(token_pair.0, token_pair.1), &pool_contract);
         self.data::<data::Data>()
             .get_pair
-            .insert(&(token_pair.1, token_pair.0), &pair_contract);
-        self.data::<data::Data>().all_pairs.push(pair_contract);
+            .insert(&(token_pair.1, token_pair.0), &pool_contract);
+        self.data::<data::Data>().all_pools.push(pool_contract);
 
-        self._emit_create_pair_event(
+        self._emit_create_pool_event(
             token_pair.0,
             token_pair.1,
             fee,
-            self.all_pairs_length(),
+						tick_spacing,
+						&pool_contract,
         );
-        Ok(pair_contract)
+        Ok(pool_contract)
     }
-
-		// function list
-		// default fn owner(){
-		// }
-		// default fn fee_amount_tickspacing(&mut sele, fee) -> u32:tickspacing{
-		// }
-		// default fn get_pool(){
-		// }
-		// default fn create_pool(){	
-		// }
-		// default fn set_owner(){
-		// }
-		// default fn enable_fee_amount(&mut self,f64:fee,u32:tickspacing) {
-		// }
 
     #[modifiers(only_fee_setter)]
     default fn set_fee_to(&mut self, fee_to: AccountId) -> Result<(), FactoryError> {

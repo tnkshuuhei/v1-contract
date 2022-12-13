@@ -10,11 +10,8 @@ pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Data);
 #[derive(Default, Debug)]
 #[openbrush::upgradeable_storage(STORAGE_KEY)]
 pub struct Data {
-    pub fee_to: AccountId,
-    pub fee_to_setter: AccountId,
-    pub get_pool: Mapping<(AccountId, AccountId), AccountId>,
-    pub all_pairs: Vec<AccountId>,
-    pub pair_contract_code_hash: Hash,
-		pub fee : u8,
-		pub tickspacing: u8,
+    pub get_pool: Mapping<AccountId, Mapping<AccountId, Mapping<u8, AccountId>>>,
+    pub all_pools: Vec<AccountId>,
+    pub owner: AccountId,
+		pub fee_amount_tick_spacing: Mapping<u8, u8>
 }

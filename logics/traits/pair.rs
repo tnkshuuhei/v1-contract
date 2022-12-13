@@ -17,7 +17,7 @@ use openbrush::{
 use super::types::WrappedU256;
 
 #[openbrush::wrapper]
-pub type PairRef = dyn Pair;
+pub type PoolRef = dyn Pair;
 
 #[openbrush::trait_definition]
 pub trait Pair {

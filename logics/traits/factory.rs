@@ -23,6 +23,8 @@ pub trait Factory {
 			token_a: AccountId,
 			token_b: AccountId,
 			fee:u8
+			tick_spacing: i8,
+			pool_contract: AccountId
     ) -> Result<AccountId, FactoryError>;
 		
 		#[ink(message)]
@@ -41,6 +43,7 @@ pub enum FactoryError {
     ZeroAddress,
     IdenticalAddresses,
     PairExists,
+		TickSpacingIsZero,
 }
 
 impl From<PairError> for FactoryError {
