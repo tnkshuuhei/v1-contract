@@ -17,7 +17,7 @@ use openbrush::{
 use super::types::WrappedU256;
 
 #[openbrush::wrapper]
-pub type PairRef = dyn Pair;
+pub type PoolRef = dyn Pair;
 
 #[openbrush::trait_definition]
 pub trait Pair {
@@ -58,6 +58,24 @@ pub trait Pair {
 
     #[ink(message)]
     fn get_token_1(&self) -> AccountId;
+
+		#[ink(message)]
+		fn factory(&self) -> AccountId;
+
+		#[ink(message)]
+		fn token0(&self) -> AccountId;
+		
+		#[ink(message)]
+		fn token_1(&self) -> AccountId;
+		
+		#[ink(message)]
+		fn fee(&self) -> u8;
+
+		#[ink(message)]
+		fn tick_spacing(&self) -> i8;
+
+		#[ink(message)]
+		fn max_liquidity_per_tick(&self) -> u8;
 }
 
 #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]

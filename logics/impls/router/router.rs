@@ -21,7 +21,7 @@ use crate::{
     },
     traits::{
         factory::FactoryRef,
-        pair::PairRef,
+        pair::PoolRef,
     },
 };
 use ink_env::CallFlags;
@@ -102,7 +102,7 @@ impl<T: Storage<data::Data>> Router for T {
         safe_transfer_from(token_a, caller, pair_contract, amount_a)?;
         safe_transfer_from(token_b, caller, pair_contract, amount_b)?;
 
-        let liquidity = PairRef::mint(&pair_contract, to)?;
+        let liquidity = PoolRef::mint(&pair_contract, to)?;
 
         Ok((amount_a, amount_b, liquidity))
     }
@@ -138,7 +138,7 @@ impl<T: Storage<data::Data>> Router for T {
         safe_transfer_from(token, caller, pair_contract, amount)?;
         wrap(&wnative, amount_native)?;
         PSP22Ref::transfer(&wnative, pair_contract, amount_native, Vec::<u8>::new())?;
-        let liquidity = PairRef::mint(&pair_contract, to)?;
+        let liquidity = PoolRef::mint(&pair_contract, to)?;
 
         if received_value > amount_native {
             safe_transfer_native(caller, received_value - amount_native)?
@@ -171,7 +171,7 @@ impl<T: Storage<data::Data>> Router for T {
             liquidity,
         )?;
 
-        let (amount_0, amount_1) = PairRef::burn_builder(&pair_contract, to)
+        let (amount_0, amount_1) = PoolRef::burn_builder(&pair_contract, to)
             .call_flags(CallFlags::default().set_allow_reentry(true))
             .fire()
             .unwrap()?;
@@ -523,7 +523,7 @@ impl<T: Storage<data::Data>> Internal for T {
             } else {
                 _to
             };
-            PairRef::swap_builder(
+            PoolRef::swap_builder(
                 &pair_for(factory_ref, pair_hash, input, output)?,
                 amount_0_out,
                 amount_1_out,

@@ -1,6 +1,6 @@
 use crate::{
 	helpers::math::casted_mul,
-	traits::pair::PairRef,
+	traits::pair::PoolRef,
 };
 use ink_env::hash::{
 	Blake2x256,
@@ -76,7 +76,7 @@ pub fn get_reserves(
 ) -> Result<(Balance, Balance), HelperError> {
 	let (token_0, _) = sort_tokens(token_a, token_b)?;
 	let pair_contract = pair_for(factory, pair_code_hash, token_a, token_b)?;
-	let (reserve_0, reserve_1, _) = PairRef::get_reserves(&pair_contract);
+	let (reserve_0, reserve_1, _) = PoolRef::get_reserves(&pair_contract);
 
 	if token_a == token_0 {
 			Ok((reserve_0, reserve_1))
